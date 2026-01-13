@@ -4,14 +4,14 @@
 for project management and scheduling. It integrates with the major JavaScript web frameworks, including React. This tutorial demonstrates 
 how to use the React Bryntum Gantt with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite. 
 
-We'll cover the following:
+This tutorial covers the following:
 
-- Set up a .NET Web API that uses a local SQLite database and [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/).
-- Configure Entity Framework Core models to define the database table structure.
-- Run a seed command to populate the database with example JSON data.
-- Create API endpoints to load data and sync data changes to the database.
-- Set up a React Bryntum Gantt frontend using TypeScript and Vite.
-- Configure the Bryntum Gantt to load data from the database and synchronize changes to the database using 
+- Setting up a .NET Web API that uses a local SQLite database and [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/).
+- Configuring Entity Framework Core models to define the database table structure.
+- Running a seed command to populate the database with example JSON data.
+- Creating API endpoints to load data and sync data changes to the database.
+- Building a React Bryntum Gantt frontend using TypeScript and Vite.
+- Connecting the Bryntum Gantt to the database and synchronizing changes using 
   the created API endpoints.
 
 Here's what we'll build:
@@ -25,7 +25,7 @@ To follow along, you need the [.NET SDK](https://dotnet.microsoft.com/en-us/down
 
 ## Getting started
 
-We'll use a starter project for the .NET backend and the Vite TypeScript React frontend.
+This tutorial uses a starter project for the .NET backend and the Vite TypeScript React frontend.
 
 ### Backend starter
 
@@ -38,8 +38,8 @@ The .NET app has the following directory structure:
 - `Program.cs` sets up and starts an ASP.NET Core Web API with a single "Hello World" endpoint.
 - `dotnet-sqlite-gantt.csproj` is the project file that defines dependencies and project settings.
 - `appsettings.json` is the application's configuration file.
-- `example-data` contains the example tasks for a Bryntum Gantt, stored as JSON data. We'll use this 
-  data to populate a local SQLite database.
+- `example-data` contains the example tasks for a Bryntum Gantt, stored as JSON data. This data 
+  populates a local SQLite database.
 
 Follow the instructions in the `README.md` file to install the dependencies.
 
@@ -66,7 +66,7 @@ This string names the database file `gantt.sqlite3` and stores it in the project
 
 ## Create the data models
 
-We'll define database models for the tasks example data using [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). 
+The database models for the tasks example data use [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). 
 In Bryntum Gantt, data is managed through a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
 that contains stores for tasks, dependencies, resources, assignments, and calendars.
 
@@ -74,7 +74,7 @@ This basic tutorial covers making models for the [TaskStore](https://bryntum.com
 
 ### Create the Task model
 
-Create a folder called `Models` in the project directory. Create a file called `Task.cs` in this folder and add the 
+In the project directory, create a folder called `Models`. In this folder, create a file called `Task.cs` and add the 
 following lines of code to it:
 
 ```csharp
@@ -155,10 +155,8 @@ The `ParentId` property establishes the parent-child relationship between tasks,
 
 ### Create the sync request and response models
 
-The Bryntum Gantt has a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
-that handles loading data from and syncing data changes to the .NET backend. This project uses 
-a specific [sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure) 
-for data synchronization.
+The Bryntum Gantt project loads data from and syncs data changes to the .NET backend using 
+a specific [sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure).
 
 Create a file called `SyncModels.cs` in the `Models` directory and add the following code to it:
 
@@ -766,7 +764,7 @@ Now that we've added the API endpoints, let's set up our frontend Bryntum Gantt.
 
 ## Set up the frontend
 
-We'll now configure and add a Bryntum Gantt to the frontend starter project.
+Next, configure and add a Bryntum Gantt to the frontend starter project.
 
 ### Install the Bryntum Gantt component
 
@@ -897,7 +895,7 @@ Then, in a separate terminal, start the frontend:
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173/) in your browser. You'll see a Bryntum Gantt with the example 
+Open [http://localhost:5173](http://localhost:5173/) in your browser to see the Bryntum Gantt with the example 
 data from the local SQLite database:
 
 ![React Bryntum Gantt with CRUD functionality](images/bryntum-gantt-crud.webm)

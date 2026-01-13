@@ -35,3 +35,34 @@ Applied writing rules from `AI-writing-style-kill-list.md` and `ritza-writing-ru
 1. Changed "You'll learn to do the following" → "We'll cover the following" (use first person plural "we" voice)
 2. Changed "simplifies loading data" → "handles loading data" (avoid words close to "simply" on kill list)
 3. Changed vague "which can be useful" → "for programmatic control" (be specific, avoid fluff)
+
+### Proofread guides using Matt's style edits
+
+Prompt:
+Now proof read using specific editing feedback @writing-rules/matt-edits.md
+
+Summary:
+Applied Matt-specific style rules:
+
+**Tense (converted future to present):**
+- "We'll cover" → "This tutorial covers"
+- "We'll use a starter project" → "This tutorial uses a starter project"
+- "We'll use this data" → "This data populates"
+- "We'll define database models" → "The database models... use"
+- "We'll now configure" → "Next, configure"
+- "You'll see" → "to see"
+
+**Repetition (varied opening words):**
+- "Create a folder... Create a file" → "In the project directory, create a folder... In this folder, create a file"
+
+**Parallel structure (list items now all gerunds):**
+- "Set up" → "Setting up"
+- "Configure" → "Configuring"
+- "Run" → "Running"
+- "Create" → "Creating"
+- "Set up" → "Building"
+- "Configure" → "Connecting"
+
+**Conciseness (removed filler):**
+- "has a project that handles loading data from and syncing" → "project loads data from and syncs"
+- Removed redundant "This project uses" clause
