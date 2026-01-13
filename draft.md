@@ -1,8 +1,8 @@
-# How to use Bryntum Calendar with .NET and SQLite
+# How to use Bryntum Gantt with .NET and SQLite
 
-[Bryntum Calendar](https://bryntum.com/products/calendar/) is a performant, highly customizable JavaScript UI component 
-with multiple views. It integrates with the major JavaScript web frameworks. This tutorial demonstrates how to use 
-Bryntum Calendar with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite.
+[Bryntum Gantt](https://bryntum.com/products/gantt/) is a performant, highly customizable JavaScript UI component 
+for project management and scheduling. It integrates with the major JavaScript web frameworks. This tutorial demonstrates how to use 
+Bryntum Gantt with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite.
 
 You'll learn to do the following:
 
@@ -10,13 +10,13 @@ You'll learn to do the following:
 - Configure Entity Framework Core models to define the database table structure.
 - Run a seed command to populate the database with example JSON data.
 - Create API endpoints to load data and sync data changes to the database.
-- Set up a ReactBryntum Calendar frontend using TypeScript and Vite.
-- Configure the Bryntum Calendar to load data from the database and synchronize changes to the database
+- Set up a Bryntum Gantt frontend using TypeScript and Vite.
+- Configure the Bryntum Gantt to load data from the database and synchronize changes to the database
   using the created API endpoints.
 
 Here's what we'll build:
 
-![Bryntum Calendar](images/bryntum-calendar-complete.png)
+![Bryntum Gantt](images/bryntum-gantt-complete.png)
 
 ## Prerequisites
 
@@ -29,25 +29,25 @@ We'll use a starter project for the .NET backend and the Vite TypeScript fronten
 
 ### Backend starter
 
-Clone the [.NET starter GitHub repository](https://github.com/ritza-co/bryntum-calendar-dotnet-starter). The code for 
+Clone the [.NET starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-dotnet-starter). The code for 
 the completed tutorial is in the 
-[`completed-app`](https://github.com/ritza-co/bryntum-calendar-dotnet-starter/tree/completed-app) branch 
+[`completed-app`](https://github.com/ritza-co/bryntum-gantt-dotnet-starter/tree/completed-app) branch 
 of the repository.
 
 The .NET app has the following directory structure:
 
 - `Program.cs` sets up and starts an ASP.NET Core Web API with a single "Hello World" endpoint.
-- `dotnet-sqlite-calendar.csproj` is the project file that defines dependencies and project settings.
+- `dotnet-sqlite-gantt.csproj` is the project file that defines dependencies and project settings.
 - `appsettings.json` is the application's configuration file.
-- `example-data` contains the example events and resources for a Bryntum Calendar, stored as  JSON data. We'll use this 
+- `example-data` contains the example tasks for a Bryntum Gantt, stored as JSON data. We'll use this 
   data to populate a local SQLite database.
 
 Follow the instructions in the `README.md` file to install the dependencies.
 
 ### Frontend starter
 
-Clone the [Bryntum Calendar starter GitHub repository](https://github.com/ritza-co/bryntum-calendar-vanilla-typescript-starter). 
-The code for the completed tutorial is in the [`completed-app`](https://github.com/ritza-co/bryntum-calendar-vanilla-typescript-starter/tree/completed-app) 
+Clone the [Bryntum Gantt starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-vanilla-typescript-starter). 
+The code for the completed tutorial is in the [`completed-app`](https://github.com/ritza-co/bryntum-gantt-vanilla-typescript-starter/tree/completed-app) 
 branch of the repository.
 
 Follow the instructions in the `README.md` file to install the dependencies and run the app.
@@ -59,30 +59,23 @@ for a local SQLite database:
 
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Data Source=calendar.sqlite3"
+  "DefaultConnection": "Data Source=gantt.sqlite3"
 }
 ```
 
-This string names the database file `calendar.sqlite3` and stores it in the project directory.
+This string names the database file `gantt.sqlite3` and stores it in the project directory.
 
 ## Create the data models
 
-We'll define database models for the events and resources example data using [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). 
-In Bryntum Calendar, data stores are kept and linked 
-together in the [project](https://bryntum.com/products/calendar/docs/guide/Calendar/data/displayingdata#the-calendar-project). 
-Bryntum Calendar uses the following data stores:  
+We'll define database models for the tasks example data using [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). 
+In Bryntum Gantt, data is managed through a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
+that contains stores for tasks, dependencies, resources, assignments, and calendars.
 
-- [ResourceStore](https://bryntum.com/products/calendar/docs/api/Scheduler/data/ResourceStore)
-- [EventStore](https://bryntum.com/products/calendar/docs/api/Scheduler/data/EventStore)
-- [AssignmentStore](https://bryntum.com/products/calendar/docs/api/Scheduler/data/AssignmentStore)
-- [TimeRangeStore](https://bryntum.com/products/calendar/docs/api/Scheduler/data/TimeRangeStore)
-- [ResourceTimeRangeStore](https://bryntum.com/products/calendar/docs/api/Scheduler/data/ResourceTimeRangeStore)
+This basic tutorial covers making models for the [TaskStore](https://bryntum.com/products/gantt/docs/api/Gantt/data/TaskStore).
 
-This basic tutorial covers making models for the EventStore and the ResourceStore.
+### Create the Task model
 
-### Create the Event model
-
-Create a folder called `Models` in the project directory. Create a file called `Event.cs` in this folder and add the 
+Create a folder called `Models` in the project directory. Create a file called `Task.cs` in this folder and add the 
 following lines of code to it:
 
 ```csharp
@@ -90,235 +83,209 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace CalendarApi.Models
+namespace GanttApi.Models
 {
-    [Table("events")]
-    public class Event
-    {
-        [Key]
-        [Column("id")]
-        [JsonPropertyName("id")]
-        public int Id { get; set; }
+  [Table("tasks")]
+  public class GanttTask
+  {
+    [Key]
+    [Column("id")]
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
 
-        [JsonPropertyName("$PhantomId")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
-        public string? PhantomId { get; set; }
+    [JsonPropertyName("$PhantomId")]
+    [NotMapped]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? PhantomId { get; set; }
 
-        [Column("name")]
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
+    [Column("name")]
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 
-        [Column("startDate")]
-        [JsonPropertyName("startDate")]
-        public DateTime? StartDate { get; set; }
+    [Column("startDate")]
+    [JsonPropertyName("startDate")]
+    public DateTime? StartDate { get; set; }
 
-        [Column("endDate")]
-        [JsonPropertyName("endDate")]
-        public DateTime? EndDate { get; set; }
+    [Column("endDate")]
+    [JsonPropertyName("endDate")]
+    public DateTime? EndDate { get; set; }
 
-        [Column("allDay")]
-        [JsonPropertyName("allDay")]
-        public bool? AllDay { get; set; } = false;
+    [Column("duration")]
+    [JsonPropertyName("duration")]
+    public double? Duration { get; set; }
 
-        [Column("resourceId")]
-        [JsonPropertyName("resourceId")]
-        public string? ResourceId { get; set; }
+    [Column("percentDone")]
+    [JsonPropertyName("percentDone")]
+    public double? PercentDone { get; set; } = 0;
 
-        [Column("eventColor")]
-        [JsonPropertyName("eventColor")]
-        public string? EventColor { get; set; }
+    [Column("parentId")]
+    [JsonPropertyName("parentId")]
+    public int? ParentId { get; set; }
 
-        [Column("readOnly")]
-        [JsonPropertyName("readOnly")]
-        public bool? ReadOnly { get; set; } = false;
+    [Column("expanded")]
+    [JsonPropertyName("expanded")]
+    public bool? Expanded { get; set; } = true;
 
-        [Column("timeZone")]
-        [JsonPropertyName("timeZone")]
-        public string? TimeZone { get; set; }
+    [Column("rollup")]
+    [JsonPropertyName("rollup")]
+    public bool? Rollup { get; set; } = false;
 
-        [Column("draggable")]
-        [JsonPropertyName("draggable")]
-        public bool? Draggable { get; set; } = true;
+    [Column("manuallyScheduled")]
+    [JsonPropertyName("manuallyScheduled")]
+    public bool? ManuallyScheduled { get; set; } = true;
 
-        [Column("resizable")]
-        [JsonPropertyName("resizable")]
-        public string? Resizable { get; set; } = "true";
+    [Column("parentIndex")]
+    [JsonPropertyName("parentIndex")]
+    public int? ParentIndex { get; set; }
 
-        [Column("duration")]
-        [JsonPropertyName("duration")]
-        public double? Duration { get; set; }
-
-        [Column("durationUnit")]
-        [JsonPropertyName("durationUnit")]
-        public string? DurationUnit { get; set; } = "day";
-
-        [Column("exceptionDates")]
-        [JsonPropertyName("exceptionDates")]
-        [JsonConverter(typeof(JsonStringToArrayConverter))]
-        public string? ExceptionDates { get; set; }
-
-        [Column("recurrenceRule")]
-        [JsonPropertyName("recurrenceRule")]
-        public string? RecurrenceRule { get; set; }
-
-        [Column("cls")]
-        [JsonPropertyName("cls")]
-        public string? Cls { get; set; }
-
-        [Column("eventStyle")]
-        [JsonPropertyName("eventStyle")]
-        public string? EventStyle { get; set; }
-
-        [Column("iconCls")]
-        [JsonPropertyName("iconCls")]
-        public string? IconCls { get; set; }
-
-        [Column("style")]
-        [JsonPropertyName("style")]
-        public string? Style { get; set; }
+    [Column("effort")]
+    [JsonPropertyName("effort")]
+    public int? Effort { get; set; }        
     }
 }
 ```
 
-We define the `Event` model class that represents the `"events"` table in the database. The table name is set using the 
-`[Table("events")]` attribute.
+We define the `GanttTask` model class that represents the `"tasks"` table in the database. The table name is set using the 
+`[Table("tasks")]` attribute.
 
 The model properties define the columns for the database table. We use [data annotations](https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties) 
 to set the column names, data types, and constraints. The `[JsonPropertyName]` attributes ensure the properties are 
-serialized to the correct JSON property names expected by the Bryntum Calendar.
+serialized to the correct JSON property names expected by the Bryntum Gantt.
 
-The `ExceptionDates` property uses a custom JSON converter, which we'll create later, to convert the string stored in 
-the database to a JSON array for the Bryntum Calendar.
-
-### Create the Resource model
-
-Create a file called `Resource.cs` in the `Models` directory and add the following lines of code to it:
-
-```csharp
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-
-namespace CalendarApi.Models
-{
-    [Table("resources")]
-    public class Resource
-    {
-        [Key]
-        [Column("id")]
-        [JsonPropertyName("id")]
-        public string? Id { get; set; }
-
-        [JsonPropertyName("$PhantomId")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
-        public string? PhantomId { get; set; }
-
-        [Column("name")]
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
-
-        [Column("eventColor")]
-        [JsonPropertyName("eventColor")]
-        public string? EventColor { get; set; }
-
-        [Column("readOnly")]
-        [JsonPropertyName("readOnly")]
-        public bool? ReadOnly { get; set; } = false;
-    }
-}
-```
-
-We define the `Resource` model class that represents the `"resources"` table in the database. 
-
-### Create the JSON string-to-array converter
-
-The Bryntum Calendar sends and expects `exceptionDates` as a JSON array, but we store it as a string in SQLite.
-
-Create a file called `JsonStringToArrayConverter.cs` in the `Models` directory to handle this conversion. 
-Add the following code to it:
-
-```csharp
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-namespace CalendarApi.Models
-{
-    /// <summary>
-    /// Converts a JSON string stored in the database to an array when serializing for API responses.
-    /// E.g., stored as "[]" or "[\"2025-01-01\"]" -> serialized as [] or ["2025-01-01"]
-    /// </summary>
-    public class JsonStringToArrayConverter : JsonConverter<string?>
-    {
-        public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            // When reading from JSON (e.g., from request), we might get an array or string
-            if (reader.TokenType == JsonTokenType.Null)
-            {
-                return null;
-            }
-            
-            if (reader.TokenType == JsonTokenType.StartArray)
-            {
-                // Read the array and convert to JSON string for storage
-                using var doc = JsonDocument.ParseValue(ref reader);
-                return doc.RootElement.GetRawText();
-            }
-            
-            // If it's already a string, return as-is
-            return reader.GetString();
-        }
-
-        public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
-        {
-            if (value == null)
-            {
-                writer.WriteNullValue();
-                return;
-            }
-
-            // Parse the JSON string and write it as raw JSON (array)
-            try
-            {
-                using var doc = JsonDocument.Parse(value);
-                doc.RootElement.WriteTo(writer);
-            }
-            catch
-            {
-                // If parsing fails, write as null
-                writer.WriteNullValue();
-            }
-        }
-    }
-}
-```
-
-This custom JSON converter converts a JSON string stored in the database to an array when serializing for API responses.
+The `ParentId` property establishes the parent-child relationship between tasks, allowing for hierarchical task structures.
 
 ### Create the sync request and response models
 
-The Bryntum Calendar has a [Crud Manager](https://bryntum.com/products/calendar/docs/guide/Calendar/data/crud_manager) 
-that simplifies loading data from and syncing data changes to the .NET backend. This Crud Manager uses 
-a specific [sync request structure](https://bryntum.com/products/calendar/docs/guide/Scheduler/data/crud_manager_in_depth#sync-request-structure) 
+The Bryntum Gantt has a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
+that simplifies loading data from and syncing data changes to the .NET backend. This project uses 
+a specific [sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure) 
 for data synchronization.
 
 Create a file called `SyncModels.cs` in the `Models` directory and add the following code to it:
 
 ```csharp
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CalendarApi.Models
+namespace GanttApi.Models
 {
+    /// <summary>
+    /// Represents an optional JSON property where we need to distinguish:
+    /// - property missing (IsSet = false)
+    /// - property present with value (IsSet = true, Value = ...)
+    /// - property present with explicit null (IsSet = true, Value = null)
+    /// </summary>
+    [JsonConverter(typeof(OptionalJsonConverterFactory))]
+    public readonly struct Optional<T>
+    {
+        public Optional(T? value, bool isSet)
+        {
+            Value = value;
+            IsSet = isSet;
+        }
+
+        public bool IsSet { get; }
+        public T? Value { get; }
+    }
+
+    public sealed class OptionalJsonConverterFactory : JsonConverterFactory
+    {
+        public override bool CanConvert(Type typeToConvert)
+            => typeToConvert.IsGenericType && typeToConvert.GetGenericTypeDefinition() == typeof(Optional<>);
+
+        public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+        {
+            var innerType = typeToConvert.GetGenericArguments()[0];
+            var converterType = typeof(OptionalJsonConverter<>).MakeGenericType(innerType);
+            return (JsonConverter)Activator.CreateInstance(converterType)!;
+        }
+
+        private sealed class OptionalJsonConverter<T> : JsonConverter<Optional<T>>
+        {
+            public override Optional<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Null)
+                {
+                    return new Optional<T>(default, isSet: true);
+                }
+
+                var value = JsonSerializer.Deserialize<T>(ref reader, options);
+                return new Optional<T>(value, isSet: true);
+            }
+
+            public override void Write(Utf8JsonWriter writer, Optional<T> value, JsonSerializerOptions options)
+            {
+                // Not currently used for responses, but implemented for completeness.
+                JsonSerializer.Serialize(writer, value.Value, options);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Patch DTO for task updates (supports partial updates while preserving "explicit null" intent).
+    /// </summary>
+    public class GanttTaskPatch
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public Optional<string?> Name { get; set; }
+
+        [JsonPropertyName("startDate")]
+        public Optional<DateTime?> StartDate { get; set; }
+
+        [JsonPropertyName("endDate")]
+        public Optional<DateTime?> EndDate { get; set; }
+
+        [JsonPropertyName("duration")]
+        public Optional<double?> Duration { get; set; }
+
+        [JsonPropertyName("percentDone")]
+        public Optional<double?> PercentDone { get; set; }
+
+        [JsonPropertyName("parentId")]
+        public Optional<int?> ParentId { get; set; }
+
+        [JsonPropertyName("parentIndex")]
+        public Optional<int?> ParentIndex { get; set; }
+
+        [JsonPropertyName("expanded")]
+        public Optional<bool?> Expanded { get; set; }
+
+        [JsonPropertyName("rollup")]
+        public Optional<bool?> Rollup { get; set; }
+
+        [JsonPropertyName("manuallyScheduled")]
+        public Optional<bool?> ManuallyScheduled { get; set; }
+
+        [JsonPropertyName("effort")]
+        public Optional<int?> Effort { get; set; }
+    }
+
+    public class TaskStoreChanges
+    {
+        [JsonPropertyName("added")]
+        public List<GanttTask>? Added { get; set; }
+
+        [JsonPropertyName("updated")]
+        public List<GanttTaskPatch>? Updated { get; set; }
+
+        [JsonPropertyName("removed")]
+        public List<GanttTask>? Removed { get; set; }
+    }
+
     // Request DTOs
     public class SyncRequest
     {
         [JsonPropertyName("requestId")]
         public long? RequestId { get; set; }
 
-        [JsonPropertyName("events")]
-        public StoreChanges<Event>? Events { get; set; }
+        [JsonPropertyName("revision")]
+        public int? Revision { get; set; }
 
-        [JsonPropertyName("resources")]
-        public StoreChanges<Resource>? Resources { get; set; }
+        [JsonPropertyName("tasks")]
+        public TaskStoreChanges? Tasks { get; set; }
     }
 
     public class StoreChanges<T>
@@ -336,58 +303,60 @@ namespace CalendarApi.Models
     // Response DTOs
     public class LoadResponse
     {
-        [JsonPropertyName("events")]
-        public StoreData<Event>? Events { get; set; }
+        [JsonPropertyName("success")]
+        public bool Success { get; set; } = true;
 
-        [JsonPropertyName("resources")]
-        public StoreData<Resource>? Resources { get; set; }
+        [JsonPropertyName("requestId")]
+        public object? RequestId { get; set; }
+
+        [JsonPropertyName("revision")]
+        public int Revision { get; set; } = 1;
+
+        [JsonPropertyName("tasks")]
+        public StoreData<GanttTask>? Tasks { get; set; }
     }
 
     public class StoreData<T>
     {
         [JsonPropertyName("rows")]
         public List<T> Rows { get; set; } = new List<T>();
+
+        [JsonPropertyName("total")]
+        public int Total { get; set; }
     }
 
     public class SyncResponse
     {
+        [JsonPropertyName("success")]
+        public bool Success { get; set; }
+
         [JsonPropertyName("requestId")]
         public long? RequestId { get; set; }
 
-        [JsonPropertyName("success")]
-        public bool Success { get; set; }
+        [JsonPropertyName("revision")]
+        public int? Revision { get; set; }
 
         [JsonPropertyName("message")]
         public string? Message { get; set; }
 
-        [JsonPropertyName("events")]
-        public SyncStoreResponse? Events { get; set; }
-
-        [JsonPropertyName("resources")]
-        public SyncStoreResponse? Resources { get; set; }
+        [JsonPropertyName("tasks")]
+        public SyncStoreResponse? Tasks { get; set; }
     }
 
     public class SyncStoreResponse
     {
         [JsonPropertyName("rows")]
-        public List<IdMapping>? Rows { get; set; }
-    }
-
-    public class IdMapping
-    {
-        [JsonPropertyName("$PhantomId")]
-        public string? PhantomId { get; set; }
-
-        [JsonPropertyName("id")]
-        public object? Id { get; set; }
+        public List<GanttTask>? Rows { get; set; }
     }
 }
 ```
 
-The `SyncRequest` class contains the `requestId` and optional `events` and `resources` properties that hold the changes 
-for each store. The `StoreChanges<T>` generic class contains lists for added, updated, and removed records. 
-The `LoadResponse` and `SyncResponse` classes define the response structure that the Crud Manager expects 
-for load and sync requests.
+The `SyncRequest` class contains the `requestId`, `revision`, and optional `tasks` property that holds the changes 
+for the task store. The `TaskStoreChanges` class contains lists for added, updated, and removed records, with 
+`GanttTaskPatch` used for updates to support partial updates.
+
+The `Optional<T>` struct and `OptionalJsonConverterFactory` allow us to distinguish between a property being missing 
+from JSON (no update needed) versus explicitly set to null (should clear the value).
 
 <div class="note">
 The <code>$PhantomId</code> is a phantom identifier, a unique, auto-generated client-side value used to identify 
@@ -396,44 +365,47 @@ the record. You should not persist phantom identifiers in your database.
 
 ## Create the database context
 
-Create a folder called `Data` in the project directory. In this folder, create a `CalendarContext.cs` file 
+Create a folder called `Data` in the project directory. In this folder, create a `GanttContext.cs` file 
 containing the following lines of code:
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
-using CalendarApi.Models;
+using GanttApi.Models;
 
-namespace CalendarApi.Data
+namespace GanttApi.Data
 {
-    public class CalendarContext : DbContext
+    public class GanttContext : DbContext
     {
-        public CalendarContext(DbContextOptions<CalendarContext> options) : base(options) { }
+        public GanttContext(DbContextOptions<GanttContext> options) : base(options) { }
 
-        public DbSet<Event> Events { get; set; } = null!;
-        public DbSet<Resource> Resources { get; set; } = null!;
+        public DbSet<GanttTask> Tasks { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Event>(entity =>
+            modelBuilder.Entity<GanttTask>(entity =>
             {
-                entity.ToTable("events");
-                entity.HasKey(e => e.Id);
-            });
-
-            modelBuilder.Entity<Resource>(entity =>
-            {
-                entity.ToTable("resources");
-                entity.HasKey(r => r.Id);
+                entity.ToTable("tasks");
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.Id).ValueGeneratedOnAdd();
+                
+                // Self-referencing relationship for parent-child tasks
+                // OnDelete Cascade ensures children are deleted when parent is deleted
+                entity.HasMany<GanttTask>()
+                    .WithOne()
+                    .HasForeignKey(t => t.ParentId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
 }
 ```
 
-The `CalendarContext` class inherits from `DbContext` and defines `DbSet` properties for each model. 
-The `OnModelCreating` method configures the table names and primary keys.
+The `GanttContext` class inherits from `DbContext` and defines a `DbSet` property for tasks. 
+The `OnModelCreating` method configures the table name, primary key, and establishes the self-referencing 
+relationship for parent-child tasks with cascade delete behavior.
 
 ## Configure the .NET backend to use SQLite and seed the local SQLite database with example data
 
@@ -452,8 +424,8 @@ Replace the contents of `Program.cs` with the following:
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
-using CalendarApi.Data;
-using CalendarApi.Models;
+using GanttApi.Data;
+using GanttApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -469,7 +441,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Configure EF Core to use SQLite
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<CalendarContext>(options =>
+builder.Services.AddDbContext<GanttContext>(options =>
     options.UseSqlite(connectionString)
 );
 
@@ -499,7 +471,7 @@ app.UseCors("AllowFrontend");
 // Ensure database is created
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<CalendarContext>();
+    var context = scope.ServiceProvider.GetRequiredService<GanttContext>();
     context.Database.EnsureCreated();
 }
 
@@ -512,7 +484,7 @@ app.Run();
 static async Task SeedDatabase(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<CalendarContext>();
+    var context = scope.ServiceProvider.GetRequiredService<GanttContext>();
 
     // Drop existing tables and recreate
     await context.Database.EnsureDeletedAsync();
@@ -522,35 +494,24 @@ static async Task SeedDatabase(WebApplication app)
     // Read JSON data from example files
     var basePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "example-data"));
     
-    var eventsJsonPath = Path.Combine(basePath, "events.json");
-    var resourcesJsonPath = Path.Combine(basePath, "resources.json");
+    var tasksJsonPath = Path.Combine(basePath, "tasks.json");
 
-    Console.WriteLine($"Reading events from: {eventsJsonPath}");
-    Console.WriteLine($"Reading resources from: {resourcesJsonPath}");
+    Console.WriteLine($"Reading tasks from: {tasksJsonPath}");
 
-    var eventsJson = await File.ReadAllTextAsync(eventsJsonPath);
-    var resourcesJson = await File.ReadAllTextAsync(resourcesJsonPath);
+    var tasksJson = await File.ReadAllTextAsync(tasksJsonPath);
 
     var options = new JsonSerializerOptions
     {
         PropertyNameCaseInsensitive = true
     };
 
-    var events = JsonSerializer.Deserialize<List<Event>>(eventsJson, options);
-    var resources = JsonSerializer.Deserialize<List<Resource>>(resourcesJson, options);
+    var tasks = JsonSerializer.Deserialize<List<GanttTask>>(tasksJson, options);
 
-    if (resources != null && resources.Count > 0)
+    if (tasks != null && tasks.Count > 0)
     {
-        await context.Resources.AddRangeAsync(resources);
+        await context.Tasks.AddRangeAsync(tasks);
         await context.SaveChangesAsync();
-        Console.WriteLine($"Added {resources.Count} resources.");
-    }
-
-    if (events != null && events.Count > 0)
-    {
-        await context.Events.AddRangeAsync(events);
-        await context.SaveChangesAsync();
-        Console.WriteLine($"Added {events.Count} events.");
+        Console.WriteLine($"Added {tasks.Count} tasks.");
     }
 
     Console.WriteLine("Database seeded successfully!");
@@ -573,33 +534,36 @@ dotnet run -- --seed
 You should see the following output in your terminal:
 
 ```
+Database recreated.
+Reading tasks from: /path/to/example-data/tasks.json
+Added 12 tasks.
 Database seeded successfully!
 ```
 
-You will also see a `calendar.sqlite3` file created in your project folder. This database is populated with the example 
-events and resources data.
+You will also see a `gantt.sqlite3` file created in your project folder. This database is populated with the example 
+tasks data.
 
-## Create an API endpoint to load the Bryntum Calendar data from the database
+## Create an API endpoint to load the Bryntum Gantt data from the database
 
-Create a folder called `Controllers` in the project directory. Create a file called `CalendarController.cs` 
+Create a folder called `Controllers` in the project directory. Create a file called `GanttController.cs` 
 in this folder. First, add the controller class with the `/api/load` endpoint:
 
 ```csharp
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CalendarApi.Data;
-using CalendarApi.Models;
+using GanttApi.Data;
+using GanttApi.Models;
 
-namespace CalendarApi.Controllers
+namespace GanttApi.Controllers
 {
     [ApiController]
     [Route("api")]
-    public class CalendarController : ControllerBase
+    public class GanttController : ControllerBase
     {
-        private readonly CalendarContext _context;
-        private readonly ILogger<CalendarController> _logger;
+        private readonly GanttContext _context;
+        private readonly ILogger<GanttController> _logger;
 
-        public CalendarController(CalendarContext context, ILogger<CalendarController> logger)
+        public GanttController(GanttContext context, ILogger<GanttController> logger)
         {
             _context = context;
             _logger = logger;
@@ -610,39 +574,47 @@ namespace CalendarApi.Controllers
         {
             try
             {
-                var eventsTask = _context.Events.ToListAsync();
-                var resourcesTask = _context.Resources.ToListAsync();
-
-                await Task.WhenAll(eventsTask, resourcesTask);
+                // ParentIndex is a sibling-ordering field (it only makes sense within the same parent),
+                // so we order by ParentId first and then ParentIndex.
+                var tasks = await _context.Tasks
+                    .OrderBy(t => t.ParentId)
+                    .ThenBy(t => t.ParentIndex)
+                    .ToListAsync();
 
                 var response = new LoadResponse
                 {
-                    Events = new StoreData<Event> { Rows = eventsTask.Result },
-                    Resources = new StoreData<Resource> { Rows = resourcesTask.Result }
+                    Success = true,
+                    RequestId = Request.Headers["x-request-id"].FirstOrDefault() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
+                    Revision = 1,
+                    Tasks = new StoreData<GanttTask> 
+                    { 
+                        Rows = tasks,
+                        Total = tasks.Count
+                    }
                 };
 
-                _logger.LogInformation("Loaded {EventCount} events and {ResourceCount} resources",
-                    eventsTask.Result.Count, resourcesTask.Result.Count);
+                _logger.LogInformation("Loaded {TaskCount} tasks", tasks.Count);
 
                 return Ok(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading data");
-                return StatusCode(500, new { success = false, message = "There was an error loading the events and resources data." });
+                return StatusCode(500, new { success = false, message = "There was an error loading the tasks data." });
             }
         }
     }
 }
 ```
 
-The `/api/load` endpoint fetches all events and resources from the SQLite database and returns them in the 
-[load response structure](https://bryntum.com/products/calendar/docs/guide/Calendar/data/crud_manager#load-response-structure) 
-that the Bryntum Calendar Crud Manager expects.
+The `/api/load` endpoint fetches all tasks from the SQLite database and returns them in the 
+[load response structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#load-response-structure) 
+that the Bryntum Gantt project expects. The tasks are ordered by `ParentId` and `ParentIndex` to maintain 
+the correct hierarchical structure.
 
-## Create an API endpoint to sync Bryntum Calendar data changes to the database
+## Create an API endpoint to sync Bryntum Gantt data changes to the database
 
-Below the `Load` method in `CalendarController.cs`, add the following `Sync` method for syncing data changes:
+Below the `Load` method in `GanttController.cs`, add the following `Sync` method for syncing data changes:
 
 ```csharp
 [HttpPost("sync")]
@@ -655,25 +627,14 @@ public async Task<ActionResult<SyncResponse>> Sync([FromBody] SyncRequest reques
         var response = new SyncResponse
         {
             RequestId = request.RequestId,
-            Success = true
+            Revision = (request.Revision ?? 0) + 1,
+            Success = true,
+            Tasks = new SyncStoreResponse { Rows = new List<GanttTask>() }
         };
 
-        if (request.Resources != null)
+        if (request.Tasks != null)
         {
-            var rows = await ApplyResourceChanges(request.Resources);
-            if (rows != null && rows.Count > 0)
-            {
-                response.Resources = new SyncStoreResponse { Rows = rows };
-            }
-        }
-
-        if (request.Events != null)
-        {
-            var rows = await ApplyEventChanges(request.Events);
-            if (rows != null && rows.Count > 0)
-            {
-                response.Events = new SyncStoreResponse { Rows = rows };
-            }
+            await ApplyTaskChanges(request.Tasks, response);
         }
 
         return Ok(response);
@@ -691,96 +652,63 @@ public async Task<ActionResult<SyncResponse>> Sync([FromBody] SyncRequest reques
 }
 ```
 
-The Bryntum Calendar sends JSON data in POST requests to the `/api/sync` endpoint when there are data changes. 
-The request body is parsed to determine which data stores have changed. A Crud Manager sync request includes the changes 
-for all the linked data stores in a single request, with a specific [sync request structure](https://bryntum.com/products/calendar/docs/guide/Scheduler/data/crud_manager_in_depth#sync-request-structure). 
-We call the `ApplyResourceChanges` and `ApplyEventChanges` helper methods for each data store that has changed. 
-Let's create these helper methods next.
+The Bryntum Gantt sends JSON data in POST requests to the `/api/sync` endpoint when there are data changes. 
+The request body is parsed to determine which data stores have changed. Let's create the `ApplyTaskChanges` 
+helper method next.
 
-### Create the ApplyEventChanges helper method
+### Create the ApplyTaskChanges helper method
 
-In `CalendarController.cs`, add the following `ApplyEventChanges` method below the `Sync` method to 
-handle event CRUD operations:
+In `GanttController.cs`, add the following `ApplyTaskChanges` method below the `Sync` method to 
+handle task CRUD operations:
 
 ```csharp
-
-private async Task<List<IdMapping>?> ApplyEventChanges(StoreChanges<Event> changes)
+private async Task ApplyTaskChanges(TaskStoreChanges changes, SyncResponse response)
 {
-    List<IdMapping>? rows = null;
-
+    // Handle added tasks - map phantom IDs to real IDs
     if (changes.Added != null && changes.Added.Count > 0)
     {
-        rows = new List<IdMapping>();
-        foreach (var newEvent in changes.Added)
+        foreach (var newTask in changes.Added)
         {
-            // Reset Id to 0 for new events (will be auto-generated)
-            newEvent.Id = 0;
+            var phantomId = newTask.PhantomId;
+            
+            // Reset Id to 0 for new tasks (will be auto-generated)
+            newTask.Id = 0;
             // Ensure Name is not null (required field)
-            if (newEvent.Name == null) newEvent.Name = "";
+            if (newTask.Name == null) newTask.Name = "";
 
-            _context.Events.Add(newEvent);
+            _context.Tasks.Add(newTask);
             await _context.SaveChangesAsync();
 
-            rows.Add(new IdMapping
-            {
-                PhantomId = newEvent.PhantomId,
-                Id = newEvent.Id
-            });
+            // Return the created task (includes both $PhantomId and the real id for client mapping)
+            newTask.PhantomId = phantomId;
+            response.Tasks!.Rows!.Add(newTask);
         }
     }
 
+    // Handle updated tasks
     if (changes.Updated != null && changes.Updated.Count > 0)
     {
-        foreach (var eventUpdate in changes.Updated)
+        foreach (var taskUpdate in changes.Updated)
         {
-            if (eventUpdate.Id > 0)
+            if (taskUpdate.Id > 0)
             {
-                var existingEvent = await _context.Events.FindAsync(eventUpdate.Id);
-                if (existingEvent != null)
+                var existingTask = await _context.Tasks.FindAsync(taskUpdate.Id);
+                if (existingTask != null)
                 {
-                    // Update only non-null fields (partial update)
-                    if (eventUpdate.Name != null) existingEvent.Name = eventUpdate.Name;
-                    
-                    // If dates are updated but duration is not explicitly provided, clear duration
-                    // so calendar calculates it from the dates
-                    bool datesUpdated = false;
-                    if (eventUpdate.StartDate.HasValue)
-                    {
-                        existingEvent.StartDate = eventUpdate.StartDate;
-                        datesUpdated = true;
-                    }
-                    if (eventUpdate.EndDate.HasValue)
-                    {
-                        existingEvent.EndDate = eventUpdate.EndDate;
-                        datesUpdated = true;
-                    }
-                    
-                    if (eventUpdate.AllDay.HasValue) existingEvent.AllDay = eventUpdate.AllDay;
-                    if (eventUpdate.ResourceId != null) existingEvent.ResourceId = eventUpdate.ResourceId;
-                    if (eventUpdate.EventColor != null) existingEvent.EventColor = eventUpdate.EventColor;
-                    if (eventUpdate.ReadOnly.HasValue) existingEvent.ReadOnly = eventUpdate.ReadOnly;
-                    if (eventUpdate.TimeZone != null) existingEvent.TimeZone = eventUpdate.TimeZone;
-                    if (eventUpdate.Draggable.HasValue) existingEvent.Draggable = eventUpdate.Draggable;
-                    if (eventUpdate.Resizable != null) existingEvent.Resizable = eventUpdate.Resizable;
-                    
-                    // Handle duration: if dates were updated and duration not explicitly provided, clear it
-                    if (eventUpdate.Duration.HasValue)
-                    {
-                        existingEvent.Duration = eventUpdate.Duration;
-                    }
-                    else if (datesUpdated)
-                    {
-                        // Dates updated but duration not provided - clear it so calendar calculates from dates
-                        existingEvent.Duration = null;
-                    }
-                    
-                    if (eventUpdate.DurationUnit != null) existingEvent.DurationUnit = eventUpdate.DurationUnit;
-                    if (eventUpdate.ExceptionDates != null) existingEvent.ExceptionDates = eventUpdate.ExceptionDates;
-                    if (eventUpdate.RecurrenceRule != null) existingEvent.RecurrenceRule = eventUpdate.RecurrenceRule;
-                    if (eventUpdate.Cls != null) existingEvent.Cls = eventUpdate.Cls;
-                    if (eventUpdate.EventStyle != null) existingEvent.EventStyle = eventUpdate.EventStyle;
-                    if (eventUpdate.IconCls != null) existingEvent.IconCls = eventUpdate.IconCls;
-                    if (eventUpdate.Style != null) existingEvent.Style = eventUpdate.Style;
+                    // Patch semantics:
+                    // - If a property is missing in JSON, we ignore it (don't overwrite).
+                    // - If a property is present with explicit null, we DO overwrite with null.
+                    if (taskUpdate.Name.IsSet) existingTask.Name = taskUpdate.Name.Value;
+                    if (taskUpdate.StartDate.IsSet) existingTask.StartDate = taskUpdate.StartDate.Value;
+                    if (taskUpdate.EndDate.IsSet) existingTask.EndDate = taskUpdate.EndDate.Value;
+                    if (taskUpdate.Duration.IsSet) existingTask.Duration = taskUpdate.Duration.Value;
+                    if (taskUpdate.PercentDone.IsSet) existingTask.PercentDone = taskUpdate.PercentDone.Value;
+                    if (taskUpdate.ParentId.IsSet) existingTask.ParentId = taskUpdate.ParentId.Value;
+                    if (taskUpdate.ParentIndex.IsSet) existingTask.ParentIndex = taskUpdate.ParentIndex.Value;
+                    if (taskUpdate.Expanded.IsSet) existingTask.Expanded = taskUpdate.Expanded.Value;
+                    if (taskUpdate.Rollup.IsSet) existingTask.Rollup = taskUpdate.Rollup.Value;
+                    if (taskUpdate.ManuallyScheduled.IsSet) existingTask.ManuallyScheduled = taskUpdate.ManuallyScheduled.Value;
+                    if (taskUpdate.Effort.IsSet) existingTask.Effort = taskUpdate.Effort.Value;
 
                     await _context.SaveChangesAsync();
                 }
@@ -788,102 +716,28 @@ private async Task<List<IdMapping>?> ApplyEventChanges(StoreChanges<Event> chang
         }
     }
 
+    // Handle removed tasks
     if (changes.Removed != null && changes.Removed.Count > 0)
     {
-        foreach (var eventToRemove in changes.Removed)
+        foreach (var taskToRemove in changes.Removed)
         {
-            if (eventToRemove.Id > 0)
+            if (taskToRemove.Id > 0)
             {
-                var existingEvent = await _context.Events.FindAsync(eventToRemove.Id);
-                if (existingEvent != null)
+                var existingTask = await _context.Tasks.FindAsync(taskToRemove.Id);
+                if (existingTask != null)
                 {
-                    _context.Events.Remove(existingEvent);
+                    _context.Tasks.Remove(existingTask);
                     await _context.SaveChangesAsync();
                 }
             }
         }
     }
-
-    return rows;
 }
 ```
 
 This helper method checks whether the change is an `added`, `updated`, or `removed` operation, and then performs 
-the appropriate database operation. For added records, we return the phantom ID and the created database ID.
-
-### Create the ApplyResourceChanges helper method
-
-In `CalendarController.cs`, add the `ApplyResourceChanges` method below the `ApplyEventChanges` method to handle 
-resource CRUD operations:
-
-```csharp
-private async Task<List<IdMapping>?> ApplyResourceChanges(StoreChanges<Resource> changes)
-{
-    List<IdMapping>? rows = null;
-
-    if (changes.Added != null && changes.Added.Count > 0)
-    {
-        rows = new List<IdMapping>();
-        foreach (var newResource in changes.Added)
-        {
-            // Generate ID if not provided
-            if (string.IsNullOrEmpty(newResource.Id))
-            {
-                newResource.Id = Guid.NewGuid().ToString();
-            }
-            // Ensure Name is not null (required field)
-            if (newResource.Name == null) newResource.Name = "";
-
-            _context.Resources.Add(newResource);
-            await _context.SaveChangesAsync();
-
-            rows.Add(new IdMapping
-            {
-                PhantomId = newResource.PhantomId,
-                Id = newResource.Id
-            });
-        }
-    }
-
-    if (changes.Updated != null && changes.Updated.Count > 0)
-    {
-        foreach (var resourceUpdate in changes.Updated)
-        {
-            if (!string.IsNullOrEmpty(resourceUpdate.Id))
-            {
-                var existingResource = await _context.Resources.FindAsync(resourceUpdate.Id);
-                if (existingResource != null)
-                {
-                    // Update only non-null fields (partial update)
-                    if (resourceUpdate.Name != null) existingResource.Name = resourceUpdate.Name;
-                    if (resourceUpdate.EventColor != null) existingResource.EventColor = resourceUpdate.EventColor;
-                    if (resourceUpdate.ReadOnly.HasValue) existingResource.ReadOnly = resourceUpdate.ReadOnly;
-
-                    await _context.SaveChangesAsync();
-                }
-            }
-        }
-    }
-
-    if (changes.Removed != null && changes.Removed.Count > 0)
-    {
-        foreach (var resourceToRemove in changes.Removed)
-        {
-            if (!string.IsNullOrEmpty(resourceToRemove.Id))
-            {
-                var existingResource = await _context.Resources.FindAsync(resourceToRemove.Id);
-                if (existingResource != null)
-                {
-                    _context.Resources.Remove(existingResource);
-                    await _context.SaveChangesAsync();
-                }
-            }
-        }
-    }
-
-    return rows;
-}
-```
+the appropriate database operation. For added records, we return the phantom ID and the created database ID so the 
+client can map them correctly.
 
 Now that the API endpoints have been added, let's test the `/api/load` endpoint.
 
@@ -894,97 +748,129 @@ dotnet run
 ```
 
 Open [http://localhost:1337/api/load](http://localhost:1337/api/load) in your browser. You should see a JSON object of 
-the events and resources data from the SQLite database:
+the tasks data from the SQLite database:
 
 ```json
 {
-  "events": {
+  "success": true,
+  "requestId": "1234567890",
+  "revision": 1,
+  "tasks": {
     "rows": [
       {
         "id": 1,
-        "name": "Hackathon 2026",
+        "name": "Website Design",
         ...
 ```
 
-Now that we've added the API endpoints, let's set up our frontend Bryntum Calendar. 
+Now that we've added the API endpoints, let's set up our frontend Bryntum Gantt. 
 
 ## Set up the frontend
 
-We'll now configure and add a Bryntum Calendar to the frontend starter project.
+We'll now configure and add a Bryntum Gantt to the frontend starter project.
 
-### Install the Bryntum Calendar component
+### Install the Bryntum Gantt component
 
-First, access the Bryntum private npm registry by following the [guide in our docs](https://bryntum.com/products/calendar/docs/guide/Calendar/quick-start/javascript-npm#access-to-npm-registry). 
+First, access the Bryntum private npm registry by following the [guide in our docs](https://bryntum.com/products/gantt/docs/guide/Gantt/quick-start/javascript-npm#access-to-npm-registry). 
 
-Once you've logged in to the registry, install the Bryntum Calendar component:
+Once you've logged in to the registry, install the Bryntum Gantt component:
 
-> TODO: ADD TAB like https://bryntum.com/products/calendar/docs/guide/Calendar/quick-start/javascript-npm#install-component
+> TODO: ADD TAB like https://bryntum.com/products/gantt/docs/guide/Gantt/quick-start/javascript-npm#install-component
 
 ```shell
-npm install @bryntum/calendar
+npm install @bryntum/gantt
 ```
 
 ```shell
-npm install @bryntum/calendar@npm:@bryntum/calendar-trial
+npm install @bryntum/gantt@npm:@bryntum/gantt-trial
 ```
 
-### Create the calendar configuration
+### Create the Gantt configuration
 
-Create a file called `calendarConfig.ts` in the `src` folder and add the following lines of code to it:
+Create a file called `ganttConfig.ts` in the `src` folder and add the following lines of code to it:
 
 ```typescript
-import { type CalendarConfig } from '@bryntum/calendar';
+import { TaskModel, type GanttConfig  } from '@bryntum/gantt';
 
-export const calendarConfig: CalendarConfig = {
-    appendTo    : 'app',
-    date        : new Date(2026, 6, 20),
-    crudManager : {
-        loadUrl          : 'http://localhost:1337/api/load',
-        autoLoad         : true,
-        syncUrl          : 'http://localhost:1337/api/sync',
-        autoSync         : true,
-        validateResponse : true
-    }
+export const ganttConfig: GanttConfig = {
+    appendTo   : 'app',
+    viewPreset : 'weekAndDayLetter',
+    barMargin  : 10,
+    project    : {
+        taskStore : {
+            transformFlatData : true,
+
+            // Ensure newly created tasks are manually scheduled. The project-level
+            // "startedTaskScheduling : 'Manual'" does not automatically set the
+            // TaskModel field `manuallyScheduled` on new records.
+            listeners : {
+                add({ records }) {
+                    records?.forEach(task => {
+                        (task as TaskModel).manuallyScheduled = true;
+                    });
+                }
+            }
+        },
+        loadUrl               : 'http://localhost:1337/api/load',
+        autoLoad              : true,
+        syncUrl               : 'http://localhost:1337/api/sync',
+        autoSync              : true,
+        validateResponse      : true,
+        startedTaskScheduling : 'Manual'
+    },
+    columns : [
+        { type : 'name', field : 'name', text : 'Name', width : 250 },
+        { type : 'startdate', field : 'startDate', text : 'Start Date' },
+        { type : 'enddate', field : 'endDate', text : 'End Date' },
+        { type : 'duration', field : 'fullDuration', text : 'Duration' },
+        { type : 'percentdone', field : 'percentDone', text : '% Done', width : 80 }
+    ]
 };
 ```
 
-We create a configuration object for the Bryntum Calendar and configure it to attach to the `<div>` element with an 
-`id` of `"app"`. The `date` property sets the initial date to display, which is **July 20, 2026**, to match the 
-example data.
+We create a configuration object for the Bryntum Gantt and configure it to attach to the `<div>` element with an 
+`id` of `"app"`. 
 
-The Crud Manager uses the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) as a transport system 
-and JSON as the encoding format.
+The `viewPreset` property sets the time axis granularity to show weeks and day letters. The `barMargin` sets 
+spacing between task bars.
 
-We set [`loadUrl`](https://bryntum.com/products/calendar/docs/api/Scheduler/crud/AbstractCrudManagerMixin#config-loadUrl) 
-and [`syncUrl`](https://bryntum.com/products/calendar/docs/api/Scheduler/crud/AbstractCrudManagerMixin#config-syncUrl) 
-to the .NET API routes we created.
+The `project` configuration includes:
+- `taskStore.transformFlatData`: Enables automatic conversion of flat task data into a hierarchical tree structure 
+  using `parentId`.
+- `loadUrl` and `syncUrl`: The .NET API routes we created.
+- `autoLoad` and `autoSync`: Enable automatic data loading and synchronization.
+- `startedTaskScheduling: 'Manual'`: Ensures tasks are manually scheduled by default.
 
-### Create the Bryntum Calendar
+The `columns` array defines what columns to display in the Gantt's grid section.
 
-Update the `main.ts` file to import and create the Bryntum Calendar:
+### Create the Bryntum Gantt
+
+Update the `main.ts` file to import and create the Bryntum Gantt:
 
 ```typescript
-import { Calendar } from '@bryntum/calendar';
-import { calendarConfig } from './calendarConfig';
+import { Gantt } from '@bryntum/gantt';
+import { ganttConfig } from './ganttConfig';
 import './style.css';
 
-const calendar = new Calendar(calendarConfig);
+const gantt = new Gantt(ganttConfig);
+
+console.log({ gantt });
 ```
 
-We import the `Calendar` class from the Bryntum Calendar package and create an instance with our configuration.
+We import the `Gantt` class from the Bryntum Gantt package and create an instance with our configuration.
 
 ### Add styles
 
-Update the `style.css` file in the `src` directory to import the Bryntum Calendar styles and configure the layout:
+Update the `style.css` file in the `src` directory to import the Bryntum Gantt styles and configure the layout:
 
 ```css
 @import "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap";
-@import "@bryntum/calendar/fontawesome/css/fontawesome.css";
-@import "@bryntum/calendar/fontawesome/css/solid.css";
-/* Import calendar's structural CSS */
-@import "@bryntum/calendar/calendar.css";
+@import "@bryntum/gantt/fontawesome/css/fontawesome.css";
+@import "@bryntum/gantt/fontawesome/css/solid.css";
+/* Import Gantt's structural CSS */
+@import "@bryntum/gantt/gantt.css";
 /* Import your preferred Bryntum theme */
-@import "@bryntum/calendar/svalbard-light.css";
+@import "@bryntum/gantt/svalbard-light.css";
 
 * {
     margin: 0;
@@ -1006,7 +892,7 @@ html {
 We import the CSS for the Svalbard light theme (one of the four available themes with light and dark variants).
 
 You can also create custom themes. The structural CSS and themes have separate imports. You can read more about styling 
-the Calendar in our [docs](https://bryntum.com/products/calendar/docs/guide/Calendar/customization/styling).
+the Gantt in our [docs](https://bryntum.com/products/gantt/docs/guide/Gantt/customization/styling).
 
 ## Run the application
 
@@ -1022,19 +908,19 @@ Then, in a separate terminal, start the frontend:
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173/) in your browser. You'll see a Bryntum Calendar with 
+Open [http://localhost:5173](http://localhost:5173/) in your browser. You'll see a Bryntum Gantt with 
 the example data from the local SQLite database:
 
-![Bryntum Calendar with CRUD functionality](images/bryntum-calendar-crud.webm)
+![Bryntum Gantt with CRUD functionality](images/bryntum-gantt-crud.webm)
 
-Because the Bryntum Calendar has CRUD functionality, any changes made to it are saved to the SQLite database.
+Because the Bryntum Gantt has CRUD functionality, any changes made to it are saved to the SQLite database.
 
 ## Next steps
 
-This tutorial covers the basics of using Bryntum Calendar with .NET and SQLite. Take a look at the 
-[Bryntum Calendar examples page](https://bryntum.com/products/calendar/examples/) to browse the additional features 
-you can add to your Calendar, such as:
+This tutorial covers the basics of using Bryntum Gantt with .NET and SQLite. Take a look at the 
+[Bryntum Gantt examples page](https://bryntum.com/products/gantt/examples/) to browse the additional features 
+you can add to your Gantt, such as:
 
-- [Dragging events from an external grid](https://bryntum.com/products/calendar/examples/dragfromgrid/)
-- [Dragging events between different calendars](https://bryntum.com/products/calendar/examples/drag-between-calendars/)
-- [Calendar + Task Board integration](https://bryntum.com/products/calendar/examples/calendar-taskboard/)
+- [Task dependencies](https://bryntum.com/products/gantt/examples/dependencies/)
+- [Critical path highlighting](https://bryntum.com/products/gantt/examples/criticalpaths/)
+- [Resource assignment](https://bryntum.com/products/gantt/examples/resourceassignment/)

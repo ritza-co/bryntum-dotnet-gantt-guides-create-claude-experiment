@@ -69,7 +69,8 @@ static async Task SeedDatabase(WebApplication app)
     Console.WriteLine("Database recreated.");
 
     // Read JSON data from example files
-    var basePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "example-json-data", "gantt"));
+    var basePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "example-data"));
+    
     
     var tasksJsonPath = Path.Combine(basePath, "tasks.json");
 
