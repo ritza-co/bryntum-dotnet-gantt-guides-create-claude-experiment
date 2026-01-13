@@ -4,7 +4,7 @@
 for project management and scheduling. It integrates with the major JavaScript web frameworks, including React. This tutorial demonstrates 
 how to use the React Bryntum Gantt with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite. 
 
-You'll learn to do the following:
+We'll cover the following:
 
 - Set up a .NET Web API that uses a local SQLite database and [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/).
 - Configure Entity Framework Core models to define the database table structure.
@@ -156,7 +156,7 @@ The `ParentId` property establishes the parent-child relationship between tasks,
 ### Create the sync request and response models
 
 The Bryntum Gantt has a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
-that simplifies loading data from and syncing data changes to the .NET backend. This project uses 
+that handles loading data from and syncing data changes to the .NET backend. This project uses 
 a specific [sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure) 
 for data synchronization.
 
@@ -845,8 +845,8 @@ function App() {
 export default App;
 ```
 
-We pass in our configuration to the `BryntumGantt` component and reference the `gantt` ref to access the Gantt 
-instance, which can be useful.
+We pass in our configuration to the `BryntumGantt` component. The `gantt` ref provides access to the Gantt 
+instance for programmatic control.
 
 ### Add styles
 

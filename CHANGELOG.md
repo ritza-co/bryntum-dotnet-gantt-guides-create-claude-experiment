@@ -24,3 +24,14 @@ Summary:
    - `/QA/gantt-vanilla-starter/` - Frontend files (ganttConfig.ts, main.ts, style.css)
    - `/QA/gantt-react-starter/` - Frontend files (ganttConfig.ts, App.tsx, style.css)
    - Verified all files match the working code in `/code/` directories
+
+### Proofread guides against writing rules
+
+Prompt:
+Ok great. Now proof read @draft.md and @draft-react.md using the writing rules in /writing-rules
+
+Summary:
+Applied writing rules from `AI-writing-style-kill-list.md` and `ritza-writing-rules.md`:
+1. Changed "You'll learn to do the following" → "We'll cover the following" (use first person plural "we" voice)
+2. Changed "simplifies loading data" → "handles loading data" (avoid words close to "simply" on kill list)
+3. Changed vague "which can be useful" → "for programmatic control" (be specific, avoid fluff)
