@@ -1,1 +1,0 @@
-1. Create through Claude.md and implement the instructions. (meant to type Read)

@@ -1,8 +1,6 @@
 # How to use a React Bryntum Gantt with .NET and SQLite
 
-[Bryntum Gantt](https://bryntum.com/products/gantt/) is a performant, highly customizable JavaScript UI component 
-for project management and scheduling. It integrates with the major JavaScript web frameworks, including React. This tutorial demonstrates 
-how to use the React Bryntum Gantt with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite. 
+[Bryntum Gantt](https://bryntum.com/products/gantt/) is a performant, highly customizable JavaScript UI component  for project management and scheduling. It integrates with the major JavaScript web frameworks, including React. This tutorial demonstrates how to use the React Bryntum Gantt with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite. 
 
 This tutorial covers the following:
 
@@ -11,8 +9,7 @@ This tutorial covers the following:
 - Running a seed command to populate the database with example JSON data.
 - Creating API endpoints to load data and sync data changes to the database.
 - Building a React Bryntum Gantt frontend using TypeScript and Vite.
-- Connecting the Bryntum Gantt to the database and synchronizing changes using 
-  the created API endpoints.
+- Connecting the Bryntum Gantt to the database and synchronizing changes using the created API endpoints.
 
 Here's what we'll build:
 
@@ -20,8 +17,7 @@ Here's what we'll build:
 
 ## Prerequisites
 
-To follow along, you need the [.NET SDK](https://dotnet.microsoft.com/en-us/download) (version 10.0 or later) and 
-[Node.js](https://nodejs.org/en/download) installed on your system.
+To follow along, you need the [.NET SDK](https://dotnet.microsoft.com/en-us/download) (version 10.0 or later) and [Node.js](https://nodejs.org/en/download) installed on your system.
 
 ## Getting started
 
@@ -29,9 +25,7 @@ This tutorial uses a starter project for the .NET backend and the Vite TypeScrip
 
 ### Backend starter
 
-Clone the [.NET starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-dotnet-starter). The code for 
-the completed tutorial is in the [`completed-app`](https://github.com/ritza-co/bryntum-gantt-dotnet-starter/tree/completed-app) 
-branch of the repository.
+Clone the [.NET starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-dotnet-starter). The code for the completed tutorial is in the [`completed-app`](https://github.com/ritza-co/bryntum-gantt-dotnet-starter/tree/completed-app) branch of the repository.
 
 The .NET app has the following directory structure:
 
@@ -46,15 +40,13 @@ Follow the instructions in the `README.md` file to install the dependencies.
 ### Frontend starter
 
 Clone the [Bryntum React Gantt starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-react-starter). 
-The code for the completed tutorial is in the [`completed-app`](https://github.com/ritza-co/bryntum-gantt-react-starter/tree/completed-app) 
-branch of the repository.
+The code for the completed tutorial is in the [`completed-app`](https://github.com/ritza-co/bryntum-gantt-react-starter/tree/completed-app) branch of the repository.
 
 Follow the instructions in the `README.md` file to install the dependencies and run the app.
 
 ## Configure the .NET SQLite database connection
 
-In the backend starter, update the `appsettings.json` file to add a connection string below the `"AllowedHosts"` key, 
-for a local SQLite database:
+In the backend starter, update the `appsettings.json` file to add a connection string below the `"AllowedHosts"` key, for a local SQLite database:
 
 ```json
 "ConnectionStrings": {
@@ -66,9 +58,7 @@ This string names the database file `gantt.sqlite3` and stores it in the project
 
 ## Create the data models
 
-The database models for the tasks example data use [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). 
-In Bryntum Gantt, data is managed through a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
-that contains stores for tasks, dependencies, resources, assignments, and calendars.
+We'll define database models for the tasks example data using [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). In Bryntum Gantt, data is managed through a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) that contains stores for tasks, dependencies, resources, assignments, and calendars.
 
 This basic tutorial covers making models for the [TaskStore](https://bryntum.com/products/gantt/docs/api/Gantt/data/TaskStore).
 
@@ -145,16 +135,14 @@ namespace GanttApi.Models
 
 We define the `GanttTask` model class that represents the `"tasks"` table in the database. The `[Table("tasks")]` attribute sets the table name.
 
-The model properties define the columns for the database table. We use [data annotations](https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties) 
-to set the column names, data types, and constraints. The `[JsonPropertyName]` attributes ensure the properties are 
-serialized to the correct JSON property names expected by the Bryntum Gantt.
+The model properties define the columns for the database table. We use [data annotations](https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties) to set the column names, data types, and constraints. The `[JsonPropertyName]` attributes ensure the properties are serialized to the correct JSON property names expected by the Bryntum Gantt.
 
-The `ParentId` property establishes the parent-child relationship between tasks, allowing for hierarchical task structures.
+The `ParentId` property establishes the parent-child relationship between tasks, allowing for hierarchical task structures. We set `ManuallyScheduled` to `true` to indicate that the task is [manually scheduled](https://bryntum.com/products/gantt/docs/guide/engine/gantt_tasks_scheduling#manually-scheduled-tasks), the tasks are not affected by the Gantt's automatic scheduling.
 
 ### Create the sync request and response models
 
-The Bryntum Gantt project loads data from and syncs data changes to the .NET backend using 
-a specific [sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure).
+The Bryntum Gantt has a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
+that handles loading data from and syncing data changes to the .NET backend. This project uses a specific [sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure) for data synchronization.
 
 Create a file called `SyncModels.cs` in the `Models` directory and add the following code to it:
 
@@ -217,7 +205,8 @@ namespace GanttApi.Models
     }
 
     /// <summary>
-    /// Patch DTO for task updates (supports partial updates while preserving "explicit null" intent).
+    /// Patch DTO for task updates. Uses Optional&lt;T&gt; only for ParentId to distinguish
+    /// "not sent" from "explicitly null" (needed when promoting a subtask to root).
     /// </summary>
     public class GanttTaskPatch
     {
@@ -225,37 +214,37 @@ namespace GanttApi.Models
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public Optional<string?> Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("startDate")]
-        public Optional<DateTime?> StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
         [JsonPropertyName("endDate")]
-        public Optional<DateTime?> EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         [JsonPropertyName("duration")]
-        public Optional<double?> Duration { get; set; }
+        public double? Duration { get; set; }
 
         [JsonPropertyName("percentDone")]
-        public Optional<double?> PercentDone { get; set; }
+        public double? PercentDone { get; set; }
 
         [JsonPropertyName("parentId")]
         public Optional<int?> ParentId { get; set; }
 
         [JsonPropertyName("parentIndex")]
-        public Optional<int?> ParentIndex { get; set; }
+        public int? ParentIndex { get; set; }
 
         [JsonPropertyName("expanded")]
-        public Optional<bool?> Expanded { get; set; }
+        public bool? Expanded { get; set; }
 
         [JsonPropertyName("rollup")]
-        public Optional<bool?> Rollup { get; set; }
+        public bool? Rollup { get; set; }
 
         [JsonPropertyName("manuallyScheduled")]
-        public Optional<bool?> ManuallyScheduled { get; set; }
+        public bool? ManuallyScheduled { get; set; }
 
         [JsonPropertyName("effort")]
-        public Optional<int?> Effort { get; set; }
+        public int? Effort { get; set; }
     }
 
     public class TaskStoreChanges
@@ -346,12 +335,11 @@ namespace GanttApi.Models
 }
 ```
 
-The `SyncRequest` class contains the `requestId`, `revision`, and optional `tasks` property that holds the changes 
-for the task store. The `TaskStoreChanges` class contains lists for added, updated, and removed records, with 
+The `SyncRequest` class contains the `requestId`, `revision`, and optional `tasks` property that holds the changes
+for the task store. The `TaskStoreChanges` class contains lists for added, updated, and removed records, with
 `GanttTaskPatch` used for updates to support partial updates.
 
-The `Optional<T>` struct and `OptionalJsonConverterFactory` allow us to distinguish between a property being missing 
-from JSON (no update needed) versus explicitly set to null (should clear the value).
+The `Optional<T>` struct and `OptionalJsonConverterFactory` are used only for the `ParentId` property, allowing us to distinguish between a property being missing from JSON (no update needed) versus explicitly set to null (needed when promoting a subtask to root level).
 
 <div class="note">
 The <code>$PhantomId</code> is a phantom identifier, a unique, auto-generated client-side value used to identify 
@@ -688,20 +676,20 @@ private async Task ApplyTaskChanges(TaskStoreChanges changes, SyncResponse respo
                 var existingTask = await _context.Tasks.FindAsync(taskUpdate.Id);
                 if (existingTask != null)
                 {
-                    // Patch semantics:
-                    // - If a property is missing in JSON, we ignore it (don't overwrite).
-                    // - If a property is present with explicit null, we DO overwrite with null.
-                    if (taskUpdate.Name.IsSet) existingTask.Name = taskUpdate.Name.Value;
-                    if (taskUpdate.StartDate.IsSet) existingTask.StartDate = taskUpdate.StartDate.Value;
-                    if (taskUpdate.EndDate.IsSet) existingTask.EndDate = taskUpdate.EndDate.Value;
-                    if (taskUpdate.Duration.IsSet) existingTask.Duration = taskUpdate.Duration.Value;
-                    if (taskUpdate.PercentDone.IsSet) existingTask.PercentDone = taskUpdate.PercentDone.Value;
+                    // Update fields if provided (null means not sent for most fields)
+                    if (taskUpdate.Name != null) existingTask.Name = taskUpdate.Name;
+                    if (taskUpdate.StartDate.HasValue) existingTask.StartDate = taskUpdate.StartDate;
+                    if (taskUpdate.EndDate.HasValue) existingTask.EndDate = taskUpdate.EndDate;
+                    if (taskUpdate.Duration.HasValue) existingTask.Duration = taskUpdate.Duration;
+                    if (taskUpdate.PercentDone.HasValue) existingTask.PercentDone = taskUpdate.PercentDone;
+                    // ParentId uses Optional<T> to distinguish "not sent" from "explicitly null"
+                    // (needed when promoting a subtask to root level)
                     if (taskUpdate.ParentId.IsSet) existingTask.ParentId = taskUpdate.ParentId.Value;
-                    if (taskUpdate.ParentIndex.IsSet) existingTask.ParentIndex = taskUpdate.ParentIndex.Value;
-                    if (taskUpdate.Expanded.IsSet) existingTask.Expanded = taskUpdate.Expanded.Value;
-                    if (taskUpdate.Rollup.IsSet) existingTask.Rollup = taskUpdate.Rollup.Value;
-                    if (taskUpdate.ManuallyScheduled.IsSet) existingTask.ManuallyScheduled = taskUpdate.ManuallyScheduled.Value;
-                    if (taskUpdate.Effort.IsSet) existingTask.Effort = taskUpdate.Effort.Value;
+                    if (taskUpdate.ParentIndex.HasValue) existingTask.ParentIndex = taskUpdate.ParentIndex;
+                    if (taskUpdate.Expanded.HasValue) existingTask.Expanded = taskUpdate.Expanded;
+                    if (taskUpdate.Rollup.HasValue) existingTask.Rollup = taskUpdate.Rollup;
+                    if (taskUpdate.ManuallyScheduled.HasValue) existingTask.ManuallyScheduled = taskUpdate.ManuallyScheduled;
+                    if (taskUpdate.Effort.HasValue) existingTask.Effort = taskUpdate.Effort;
 
                     await _context.SaveChangesAsync();
                 }
@@ -760,7 +748,7 @@ Now that we've added the API endpoints, let's set up our frontend Bryntum Gantt.
 
 ## Set up the frontend
 
-Next, we configure and add a Bryntum Gantt to the frontend starter project.
+We'll now configure and add a Bryntum Gantt to the frontend starter project.
 
 ### Install the Bryntum Gantt component
 
