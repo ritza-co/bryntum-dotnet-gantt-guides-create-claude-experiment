@@ -75,8 +75,7 @@ This basic tutorial covers making models for the [TaskStore](https://bryntum.com
 
 ### Create the Task model
 
-In the project directory, create a folder called `Models`. In this folder, create a file called `Task.cs` and add the 
-following lines of code to it:
+Create a folder called `Models` in the project directory. In this folder, add a file called `Task.cs` with the following code:
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
@@ -145,8 +144,7 @@ namespace GanttApi.Models
 }
 ```
 
-We define the `GanttTask` model class that represents the `"tasks"` table in the database. The table name is set using the 
-`[Table("tasks")]` attribute.
+We define the `GanttTask` model class that represents the `"tasks"` table in the database. The `[Table("tasks")]` attribute sets the table name.
 
 The model properties define the columns for the database table. We use [data annotations](https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties) 
 to set the column names, data types, and constraints. The `[JsonPropertyName]` attributes ensure the properties are 
@@ -363,8 +361,7 @@ the record. You should not persist phantom identifiers in your database.
 
 ## Create the database context
 
-Create a folder called `Data` in the project directory. In this folder, create a `GanttContext.cs` file 
-containing the following lines of code:
+Create a folder called `Data` in the project directory. In this folder, add a `GanttContext.cs` file with the following code:
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
@@ -543,8 +540,7 @@ tasks data.
 
 ## Create an API endpoint to load the Bryntum Gantt data from the database
 
-Create a folder called `Controllers` in the project directory. Create a file called `GanttController.cs` 
-in this folder. First, add the controller class with the `/api/load` endpoint:
+Create a folder called `Controllers` in the project directory. In this folder, add a file called `GanttController.cs`. First, add the controller class with the `/api/load` endpoint:
 
 ```csharp
 using Microsoft.AspNetCore.Mvc;
@@ -765,7 +761,7 @@ Now that we've added the API endpoints, let's set up our frontend Bryntum Gantt.
 
 ## Set up the frontend
 
-Next, configure and add a Bryntum Gantt to the frontend starter project.
+Next, we configure and add a Bryntum Gantt to the frontend starter project.
 
 ### Install the Bryntum Gantt component
 
