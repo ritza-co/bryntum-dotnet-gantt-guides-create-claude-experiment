@@ -743,7 +743,8 @@ private async Task ApplyTaskChanges(TaskStoreChanges changes, SyncResponse respo
 ```
 
 This helper method checks whether the change is an `added`, `updated`, or `removed` operation, and then performs the
-appropriate database operation. For added records, we return the phantom ID and the created database ID so the client-side Bryntum Gantt can update the tasks ID to the created database ID.
+appropriate database operation. For added records, we return the phantom ID and the created database ID so the
+client-side Bryntum Gantt can update the tasks ID to the created database ID.
 
 Now that the API endpoints have been added, let's test the `/api/load` endpoint.
 
@@ -843,7 +844,8 @@ The `project` configuration includes:
   `parentId`.
 - `loadUrl` and `syncUrl`: The .NET API routes we created.
 - `autoLoad` and `autoSync`: Enables automatic data loading and synchronization.
-- `startedTaskScheduling: 'Manual'`: This sets started tasks to be manually scheduled. They won't be affected by the Gantt's automatic scheduling.
+- `startedTaskScheduling: 'Manual'`: This sets started tasks to be manually scheduled. They won't be affected by the
+  Gantt's automatic scheduling.
 
 The `columns` array defines what columns to display in the Gantt's grid section.
 
@@ -928,9 +930,10 @@ Because the React Bryntum Gantt has CRUD functionality, any changes made to it a
 
 ## Next steps
 
-This tutorial covers the basics of using a React Bryntum Gantt with .NET and SQLite. Take a look at the
-[Bryntum Gantt examples page](https://bryntum.com/products/gantt/examples/) to browse the additional features you can
-add to your Gantt, such as these React-specific ones:
+This tutorial covers the basics of using Bryntum Calendar with .NET and SQLite. As a next step, you can add dependencies
+to the Gantt and set manual scheduling to false to allow the Gantt to schedule tasks automatically based on dependencies
+and constraints.Take a look at the [Bryntum Gantt examples page](https://bryntum.com/products/gantt/examples/) to browse
+the additional features you can add to your Gantt, such as these React-specific ones:
 
 - [Drag from grid](https://bryntum.com/products/gantt/examples/frameworks/react-vite/drag-from-grid/)
 - [Inline data with React](https://bryntum.com/products/gantt/examples/frameworks/react-vite/inline-data/)

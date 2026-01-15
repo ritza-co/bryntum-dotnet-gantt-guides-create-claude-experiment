@@ -1,4 +1,3 @@
-
 # Bryntum Gantt frontend starter
 
 A basic frontend for a Bryntum Gantt. 

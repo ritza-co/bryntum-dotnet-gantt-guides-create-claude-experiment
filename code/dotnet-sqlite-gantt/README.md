@@ -1,4 +1,3 @@
-
 # Bryntum Gantt ASP.NET Core API starter
 
 A basic ASP.NET Core API for performing CRUD operations on a SQLite database. For use with a Bryntum Gantt front end.
