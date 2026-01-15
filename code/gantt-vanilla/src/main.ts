@@ -3,5 +3,3 @@ import { ganttConfig } from './ganttConfig';
 import './style.css';
 
 const gantt = new Gantt(ganttConfig);
-
-console.log({ gantt });

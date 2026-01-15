@@ -1,10 +1,13 @@
 # How to use Bryntum Gantt with .NET and SQLite
 
-[Bryntum Gantt](https://bryntum.com/products/gantt/) is a performant, highly customizable JavaScript UI component for project management and scheduling. It integrates with the major JavaScript web frameworks. This tutorial demonstrates how to use Bryntum Gantt with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite.
+[Bryntum Gantt](https://bryntum.com/products/gantt/) is a performant, highly customizable JavaScript UI component for
+project management and scheduling. It integrates with the major JavaScript web frameworks. This tutorial demonstrates
+how to use Bryntum Gantt with a [.NET Framework](https://dotnet.microsoft.com/en-us/) backend and SQLite.
 
 This tutorial covers the following:
 
-- Setting up a .NET Web API that uses a local SQLite database and [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/).
+- Setting up a .NET Web API that uses a local SQLite database and
+  [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/).
 - Configuring Entity Framework Core models to define the database table structure.
 - Running a seed command to populate the database with example JSON data.
 - Creating API endpoints to load data and sync data changes to the database.
@@ -17,7 +20,7 @@ Here's what we'll build:
 
 ## Prerequisites
 
-To follow along, you need the [.NET SDK](https://dotnet.microsoft.com/en-us/download) (version 10.0 or later) and 
+To follow along, you need the [.NET SDK](https://dotnet.microsoft.com/en-us/download) (version 10.0 or later) and
 [Node.js](https://nodejs.org/en/download) installed on your system.
 
 ## Getting started
@@ -26,32 +29,33 @@ This tutorial uses a starter project for the .NET backend and the Vite TypeScrip
 
 ### Backend starter
 
-Clone the [.NET starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-dotnet-starter). The code for 
-the completed tutorial is in the 
-[`completed-app`](https://github.com/ritza-co/bryntum-gantt-dotnet-starter/tree/completed-app) branch 
-of the repository.
+Clone the [.NET starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-dotnet-starter). The code for the
+completed tutorial is in the
+[`completed-app`](https://github.com/ritza-co/bryntum-gantt-dotnet-starter/tree/completed-app) branch of the repository.
 
 The .NET app has the following directory structure:
 
 - `Program.cs` sets up and starts an ASP.NET Core Web API with a single "Hello World" endpoint.
 - `dotnet-sqlite-gantt.csproj` is the project file that defines dependencies and project settings.
 - `appsettings.json` is the application's configuration file.
-- `example-data` contains the example tasks for a Bryntum Gantt, stored as JSON data. This data 
-  populates a local SQLite database.
+- `example-data` contains the example tasks for a Bryntum Gantt, stored as JSON data. This data populates a local SQLite
+  database.
 
 Follow the instructions in the `README.md` file to install the dependencies.
 
 ### Frontend starter
 
-Clone the [Bryntum Gantt starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-vanilla-typescript-starter). 
-The code for the completed tutorial is in the [`completed-app`](https://github.com/ritza-co/bryntum-gantt-vanilla-typescript-starter/tree/completed-app) 
-branch of the repository.
+Clone the
+[Bryntum Gantt starter GitHub repository](https://github.com/ritza-co/bryntum-gantt-vanilla-typescript-starter). The
+code for the completed tutorial is in the
+[`completed-app`](https://github.com/ritza-co/bryntum-gantt-vanilla-typescript-starter/tree/completed-app) branch of the
+repository.
 
 Follow the instructions in the `README.md` file to install the dependencies and run the app.
 
 ## Configure the .NET SQLite database connection
 
-In the backend starter, update the `appsettings.json` file to add a connection string below the `"AllowedHosts"` key, 
+In the backend starter, update the `appsettings.json` file to add a connection string below the `"AllowedHosts"` key,
 for a local SQLite database:
 
 ```json
@@ -64,13 +68,18 @@ This string names the database file `gantt.sqlite3` and stores it in the project
 
 ## Create the data models
 
-We'll define database models for the tasks example data using [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). In Bryntum Gantt, data is managed through a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) that contains stores for tasks, dependencies, resources, assignments, and calendars.
+We'll define database models for the tasks example data using
+[Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/). In Bryntum Gantt, data is managed through a
+[project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) that contains stores for tasks,
+dependencies, resources, assignments, time ranges, and calendars.
 
-This basic tutorial covers making models for the [TaskStore](https://bryntum.com/products/gantt/docs/api/Gantt/data/TaskStore).
+This basic tutorial covers making models for the
+[TaskStore](https://bryntum.com/products/gantt/docs/api/Gantt/data/TaskStore).
 
 ### Create the Task model
 
-Create a folder called `Models` in the project directory. In this folder, add a file called `Task.cs` with the following code:
+Create a folder called `Models` in the project directory. In this folder, add a file called `Task.cs` with the following
+code:
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
@@ -134,23 +143,35 @@ namespace GanttApi.Models
 
     [Column("effort")]
     [JsonPropertyName("effort")]
-    public int? Effort { get; set; }        
+    public int? Effort { get; set; }
     }
 }
 ```
 
-We define the `GanttTask` model class that represents the `"tasks"` table in the database. The `[Table("tasks")]` attribute sets the table name.
+We define the `GanttTask` model class that represents the `"tasks"` table in the database. The `[Table("tasks")]`
+attribute sets the table name.
 
-The model properties define the columns for the database table. We use [data annotations](https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties) 
-to set the column names, data types, and constraints. The `[JsonPropertyName]` attributes ensure the properties are 
-serialized to the correct JSON property names expected by the Bryntum Gantt.
+The model properties define the columns for the database table. We use
+[data annotations](https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties) to set the column names, data
+types, and constraints. The `[JsonPropertyName]` attributes ensure the properties are serialized to the correct JSON
+property names expected by the Bryntum Gantt.
 
-The `ParentId` property establishes the parent-child relationship between tasks, allowing for hierarchical task structures. We set `ManuallyScheduled` to `true` to indicate that the task is [manually scheduled](https://bryntum.com/products/gantt/docs/guide/engine/gantt_tasks_scheduling#manually-scheduled-tasks), the tasks are not affected by the Gantt's automatic scheduling.
+The `ParentId` property establishes the parent-child relationship between tasks, allowing for hierarchical task
+structures. We set `ManuallyScheduled` to `true` to indicate that the task is
+[manually scheduled](https://bryntum.com/products/gantt/docs/guide/engine/gantt_tasks_scheduling#manually-scheduled-tasks),
+which means the tasks are not affected by the Gantt's automatic scheduling.
+
+<div class="note">
+The <code>$PhantomId</code> is a phantom identifier, a unique, auto-generated client-side value used to identify 
+the record. You should not persist phantom identifiers in your database.
+</div>
 
 ### Create the sync request and response models
 
-The Bryntum Gantt has a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) 
-that handles loading data from and syncing data changes to the .NET backend. This project uses a specific [sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure) for data synchronization.
+The Bryntum Gantt has a [project](https://bryntum.com/products/gantt/docs/api/Gantt/model/ProjectModel) that handles
+loading data from and syncing data changes to the .NET backend. This project uses a specific
+[sync request structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#sync-request-structure)
+for data synchronization.
 
 Create a file called `SyncModels.cs` in the `Models` directory and add the following code to it:
 
@@ -343,20 +364,18 @@ namespace GanttApi.Models
 }
 ```
 
-The `SyncRequest` class contains the `requestId`, `revision`, and optional `tasks` property that holds the changes
-for the task store. The `TaskStoreChanges` class contains lists for added, updated, and removed records, with
+The `SyncRequest` class contains the `requestId`, `revision`, and optional `tasks` property that holds the changes for
+the task store. The `TaskStoreChanges` class contains lists for added, updated, and removed records, with
 `GanttTaskPatch` used for updates to support partial updates.
 
-The `Optional<T>` struct and `OptionalJsonConverterFactory` are used only for the `ParentId` property, allowing us to distinguish between a property being missing from JSON (no update needed) versus explicitly set to null (needed when promoting a subtask to root level).
-
-<div class="note">
-The <code>$PhantomId</code> is a phantom identifier, a unique, auto-generated client-side value used to identify 
-the record. You should not persist phantom identifiers in your database.
-</div>
+The `Optional<T>` struct and `OptionalJsonConverterFactory` are used only for the `ParentId` property, allowing us to
+distinguish between a property being missing from JSON (no update needed) versus explicitly set to null (needed when
+promoting a subtask to root level).
 
 ## Create the database context
 
-Create a folder called `Data` in the project directory. In this folder, add a `GanttContext.cs` file with the following code:
+Create a folder called `Data` in the project directory. In this folder, add a `GanttContext.cs` file with the following
+code:
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
@@ -379,7 +398,7 @@ namespace GanttApi.Data
                 entity.ToTable("tasks");
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Id).ValueGeneratedOnAdd();
-                
+
                 // Self-referencing relationship for parent-child tasks
                 // OnDelete Cascade ensures children are deleted when parent is deleted
                 entity.HasMany<GanttTask>()
@@ -393,9 +412,9 @@ namespace GanttApi.Data
 }
 ```
 
-The `GanttContext` class inherits from `DbContext` and defines a `DbSet` property for tasks. 
-The `OnModelCreating` method configures the table name, primary key, and establishes the self-referencing 
-relationship for parent-child tasks with cascade delete behavior.
+The `GanttContext` class inherits from `DbContext` and defines a `DbSet` property for tasks. The `OnModelCreating`
+method configures the table name, primary key, and establishes the self-referencing relationship for parent-child tasks
+with cascade delete behavior.
 
 ## Configure the .NET backend to use SQLite and seed the local SQLite database with example data
 
@@ -405,7 +424,7 @@ First, install the `Microsoft.EntityFrameworkCore.Sqlite` package:
 dotnet add package Microsoft.EntityFrameworkCore.Sqlite
 ```
 
-Now let's update the `Program.cs` file to configure the .NET backend to use SQLite and create a seeding function that 
+Now let's update the `Program.cs` file to configure the .NET backend to use SQLite and create a seeding function that
 populates a local SQLite database with the example JSON data from the `example-data` directory.
 
 Replace the contents of `Program.cs` with the following:
@@ -483,7 +502,7 @@ static async Task SeedDatabase(WebApplication app)
 
     // Read JSON data from example files
     var basePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "example-data"));
-    
+
     var tasksJsonPath = Path.Combine(basePath, "tasks.json");
 
     Console.WriteLine($"Reading tasks from: {tasksJsonPath}");
@@ -508,12 +527,12 @@ static async Task SeedDatabase(WebApplication app)
 }
 ```
 
-This updated `Program.cs` file configures the Entity Framework Core to use SQLite with the connection string 
-from `appsettings.json`. It also maps controllers for the API endpoints (which we'll create) and adds CORS configuration 
-to allow requests from the frontend running on `http://localhost:5173`.
+This updated `Program.cs` file configures the Entity Framework Core to use SQLite with the connection string from
+`appsettings.json`. It also maps controllers for the API endpoints (which we'll create) and adds CORS configuration to
+allow requests from the frontend running on `http://localhost:5173`.
 
-We can run the `SeedDatabase` function with the `--seed` command line argument to populate the database 
-with the example data.
+We can run the `SeedDatabase` function with the `--seed` command line argument to populate the database with the example
+data.
 
 Run the seeding command to create and populate the database:
 
@@ -530,12 +549,13 @@ Added 12 tasks.
 Database seeded successfully!
 ```
 
-You will also see a `gantt.sqlite3` file created in your project folder. This database is populated with the example 
+You will also see a `gantt.sqlite3` file created in your project folder. This database is populated with the example
 tasks data.
 
 ## Create an API endpoint to load the Bryntum Gantt data from the database
 
-Create a folder called `Controllers` in the project directory. In this folder, add a file called `GanttController.cs`. First, add the controller class with the `/api/load` endpoint:
+Create a folder called `Controllers` in the project directory. In this folder, add a file called `GanttController.cs`.
+First, add the controller class with the `/api/load` endpoint:
 
 ```csharp
 using Microsoft.AspNetCore.Mvc;
@@ -575,8 +595,8 @@ namespace GanttApi.Controllers
                     Success = true,
                     RequestId = Request.Headers["x-request-id"].FirstOrDefault() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
                     Revision = 1,
-                    Tasks = new StoreData<GanttTask> 
-                    { 
+                    Tasks = new StoreData<GanttTask>
+                    {
                         Rows = tasks,
                         Total = tasks.Count
                     }
@@ -596,10 +616,10 @@ namespace GanttApi.Controllers
 }
 ```
 
-The `/api/load` endpoint fetches all tasks from the SQLite database and returns them in the 
-[load response structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#load-response-structure) 
-that the Bryntum Gantt project expects. The tasks are ordered by `ParentId` and `ParentIndex` to maintain 
-the correct hierarchical structure.
+The `/api/load` endpoint fetches all tasks from the SQLite database and returns them in the
+[load response structure](https://bryntum.com/products/gantt/docs/guide/Gantt/data/crud_manager#load-response-structure)
+that the Bryntum Gantt project expects. The tasks are ordered by `ParentId` and `ParentIndex` to maintain the correct
+hierarchical structure.
 
 ## Create an API endpoint to sync Bryntum Gantt data changes to the database
 
@@ -610,7 +630,7 @@ Below the `Load` method in `GanttController.cs`, add the following `Sync` method
 public async Task<ActionResult<SyncResponse>> Sync([FromBody] SyncRequest request)
 {
     _logger.LogInformation("Sync request received. RequestId: {RequestId}", request.RequestId);
-    
+
     try
     {
         var response = new SyncResponse
@@ -641,14 +661,13 @@ public async Task<ActionResult<SyncResponse>> Sync([FromBody] SyncRequest reques
 }
 ```
 
-The Bryntum Gantt sends JSON data in POST requests to the `/api/sync` endpoint when there are data changes. 
-The request body is parsed to determine which data stores have changed. Let's create the `ApplyTaskChanges` 
-helper method next.
+The Bryntum Gantt sends JSON data in POST requests to the `/api/sync` endpoint when there are data changes. The request
+body is parsed to determine which data stores have changed. Let's create the `ApplyTaskChanges` helper method next.
 
 ### Create the ApplyTaskChanges helper method
 
-In `GanttController.cs`, add the following `ApplyTaskChanges` method below the `Sync` method to 
-handle task CRUD operations:
+In `GanttController.cs`, add the following `ApplyTaskChanges` method below the `Sync` method to handle task CRUD
+operations:
 
 ```csharp
 private async Task ApplyTaskChanges(TaskStoreChanges changes, SyncResponse response)
@@ -659,7 +678,7 @@ private async Task ApplyTaskChanges(TaskStoreChanges changes, SyncResponse respo
         foreach (var newTask in changes.Added)
         {
             var phantomId = newTask.PhantomId;
-            
+
             // Reset Id to 0 for new tasks (will be auto-generated)
             newTask.Id = 0;
             // Ensure Name is not null (required field)
@@ -724,9 +743,8 @@ private async Task ApplyTaskChanges(TaskStoreChanges changes, SyncResponse respo
 }
 ```
 
-This helper method checks whether the change is an `added`, `updated`, or `removed` operation, and then performs 
-the appropriate database operation. For added records, we return the phantom ID and the created database ID so the 
-client can map them correctly.
+This helper method checks whether the change is an `added`, `updated`, or `removed` operation, and then performs the
+appropriate database operation. For added records, we return the phantom ID and the created database ID so the client-side Bryntum Gantt can update the tasks ID to the created database ID.
 
 Now that the API endpoints have been added, let's test the `/api/load` endpoint.
 
@@ -736,7 +754,7 @@ Run the development server if it's not already running:
 dotnet run
 ```
 
-Open [http://localhost:1337/api/load](http://localhost:1337/api/load) in your browser. You should see a JSON object of 
+Open [http://localhost:1337/api/load](http://localhost:1337/api/load) in your browser. You should see a JSON object of
 the tasks data from the SQLite database:
 
 ```json
@@ -752,7 +770,7 @@ the tasks data from the SQLite database:
         ...
 ```
 
-Now that we've added the API endpoints, let's set up our frontend Bryntum Gantt. 
+Now that we've added the API endpoints, let's set up our frontend Bryntum Gantt.
 
 ## Set up the frontend
 
@@ -760,7 +778,8 @@ We'll now configure and add a Bryntum Gantt to the frontend starter project.
 
 ### Install the Bryntum Gantt component
 
-First, access the Bryntum private npm registry by following the [guide in our docs](https://bryntum.com/products/gantt/docs/guide/Gantt/quick-start/javascript-npm#access-to-npm-registry). 
+First, access the Bryntum private npm registry by following the
+[guide in our docs](https://bryntum.com/products/gantt/docs/guide/Gantt/quick-start/javascript-npm#access-to-npm-registry).
 
 Once you've logged in to the registry, install the Bryntum Gantt component:
 
@@ -779,56 +798,57 @@ npm install @bryntum/gantt@npm:@bryntum/gantt-trial
 Create a file called `ganttConfig.ts` in the `src` folder and add the following lines of code to it:
 
 ```typescript
-import { TaskModel, type GanttConfig  } from '@bryntum/gantt';
+import { TaskModel, type GanttConfig } from "@bryntum/gantt";
 
 export const ganttConfig: GanttConfig = {
-    appendTo   : 'app',
-    viewPreset : 'weekAndDayLetter',
-    barMargin  : 10,
-    project    : {
-        taskStore : {
-            transformFlatData : true,
+  appendTo: "app",
+  viewPreset: "weekAndDayLetter",
+  barMargin: 10,
+  project: {
+    taskStore: {
+      transformFlatData: true,
 
-            // Ensure newly created tasks are manually scheduled. The project-level
-            // "startedTaskScheduling : 'Manual'" does not automatically set the
-            // TaskModel field `manuallyScheduled` on new records.
-            listeners : {
-                add({ records }) {
-                    records?.forEach(task => {
-                        (task as TaskModel).manuallyScheduled = true;
-                    });
-                }
-            }
+      // Ensure newly created tasks are manually scheduled. The project-level
+      // "startedTaskScheduling : 'Manual'" does not automatically set the
+      // TaskModel field `manuallyScheduled` on new records.
+      listeners: {
+        add({ records }) {
+          records?.forEach((task) => {
+            (task as TaskModel).manuallyScheduled = true;
+          });
         },
-        loadUrl               : 'http://localhost:1337/api/load',
-        autoLoad              : true,
-        syncUrl               : 'http://localhost:1337/api/sync',
-        autoSync              : true,
-        validateResponse      : true,
-        startedTaskScheduling : 'Manual'
+      },
     },
-    columns : [
-        { type : 'name', field : 'name', text : 'Name', width : 250 },
-        { type : 'startdate', field : 'startDate', text : 'Start Date' },
-        { type : 'enddate', field : 'endDate', text : 'End Date' },
-        { type : 'duration', field : 'fullDuration', text : 'Duration' },
-        { type : 'percentdone', field : 'percentDone', text : '% Done', width : 80 }
-    ]
+    loadUrl: "http://localhost:1337/api/load",
+    autoLoad: true,
+    syncUrl: "http://localhost:1337/api/sync",
+    autoSync: true,
+    validateResponse: true,
+    startedTaskScheduling: "Manual",
+  },
+  columns: [
+    { type: "name", field: "name", text: "Name", width: 250 },
+    { type: "startdate", field: "startDate", text: "Start Date" },
+    { type: "enddate", field: "endDate", text: "End Date" },
+    { type: "duration", field: "fullDuration", text: "Duration" },
+    { type: "percentdone", field: "percentDone", text: "% Done", width: 80 },
+  ],
 };
 ```
 
-We create a configuration object for the Bryntum Gantt and configure it to attach to the `<div>` element with an 
-`id` of `"app"`. 
+We create a configuration object for the Bryntum Gantt and configure it to attach to the `<div>` element with an `id` of
+`"app"`.
 
-The `viewPreset` property sets the time axis granularity to show weeks and day letters. The `barMargin` sets 
-spacing between task bars.
+The `viewPreset` property sets the time axis granularity to show weeks and day letters. The `barMargin` sets spacing
+between task bars.
 
 The `project` configuration includes:
-- `taskStore.transformFlatData`: Enables automatic conversion of flat task data into a hierarchical tree structure 
-  using `parentId`.
+
+- `taskStore.transformFlatData`: Enables automatic conversion of flat task data into a hierarchical tree structure using
+  `parentId`.
 - `loadUrl` and `syncUrl`: The .NET API routes we created.
-- `autoLoad` and `autoSync`: Enable automatic data loading and synchronization.
-- `startedTaskScheduling: 'Manual'`: Ensures tasks are manually scheduled by default.
+- `autoLoad` and `autoSync`: Enables automatic data loading and synchronization.
+- `startedTaskScheduling: 'Manual'`: This sets started tasks to be manually scheduled. They won't be affected by the Gantt's automatic scheduling.
 
 The `columns` array defines what columns to display in the Gantt's grid section.
 
@@ -837,13 +857,11 @@ The `columns` array defines what columns to display in the Gantt's grid section.
 Update the `main.ts` file to import and create the Bryntum Gantt:
 
 ```typescript
-import { Gantt } from '@bryntum/gantt';
-import { ganttConfig } from './ganttConfig';
-import './style.css';
+import { Gantt } from "@bryntum/gantt";
+import { ganttConfig } from "./ganttConfig";
+import "./style.css";
 
 const gantt = new Gantt(ganttConfig);
-
-console.log({ gantt });
 ```
 
 We import the `Gantt` class from the Bryntum Gantt package and create an instance with our configuration.
@@ -862,25 +880,25 @@ Update the `style.css` file in the `src` directory to import the Bryntum Gantt s
 @import "@bryntum/gantt/svalbard-light.css";
 
 * {
-    margin: 0;
+  margin: 0;
 }
 
 body,
 html {
-    font-family: Poppins, "Open Sans", Helvetica, Arial, sans-serif;
+  font-family: Poppins, "Open Sans", Helvetica, Arial, sans-serif;
 }
 
 #app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-size: 14px;
 }
 ```
 
 We import the CSS for the Svalbard light theme (one of the four available themes with light and dark variants).
 
-You can also create custom themes. The structural CSS and themes have separate imports. You can read more about styling 
+You can also create custom themes. The structural CSS and themes have separate imports. You can read more about styling
 the Gantt in our [docs](https://bryntum.com/products/gantt/docs/guide/Gantt/customization/styling).
 
 ## Run the application
@@ -897,8 +915,8 @@ Then, in a separate terminal, start the frontend:
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173/) in your browser to see the Bryntum Gantt with 
-the example data from the local SQLite database:
+Open [http://localhost:5173](http://localhost:5173/) in your browser to see the Bryntum Gantt with the example data from
+the local SQLite database:
 
 ![Bryntum Gantt with CRUD functionality](images/bryntum-gantt-crud.webm)
 
@@ -906,9 +924,9 @@ Because the Bryntum Gantt has CRUD functionality, any changes made to it are sav
 
 ## Next steps
 
-This tutorial covers the basics of using Bryntum Gantt with .NET and SQLite. Take a look at the 
-[Bryntum Gantt examples page](https://bryntum.com/products/gantt/examples/) to browse the additional features 
-you can add to your Gantt, such as:
+This tutorial covers the basics of using Bryntum Gantt with .NET and SQLite. Take a look at the
+[Bryntum Gantt examples page](https://bryntum.com/products/gantt/examples/) to browse the additional features you can
+add to your Gantt, such as:
 
 - [Task dependencies](https://bryntum.com/products/gantt/examples/dependencies/)
 - [Critical path highlighting](https://bryntum.com/products/gantt/examples/criticalpaths/)

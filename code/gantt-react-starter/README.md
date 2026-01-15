@@ -1,7 +1,6 @@
-
 # Bryntum Gantt frontend starter - React
 
-A basic frontend for a Bryntum gantt. 
+A basic frontend for a Bryntum Gantt. 
 
 ## Install dependencies
 

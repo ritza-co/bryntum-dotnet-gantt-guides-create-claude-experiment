@@ -66,3 +66,58 @@ Applied Matt-specific style rules:
 **Conciseness (removed filler):**
 - "has a project that handles loading data from and syncing" → "project loads data from and syncs"
 - Removed redundant "This project uses" clause
+
+### QA Validation of draft.md (Vanilla TypeScript guide)
+
+Prompt:
+QA @draft.md - Go through guide, modify only code in /QA folder, then compare with final code
+
+Summary:
+Followed the guide step-by-step and applied all changes to QA starter folders:
+
+**Backend (/QA/dotnet-sqlite-gantt-starter):**
+1. Updated `appsettings.json` with SQLite connection string
+2. Created `Models/Task.cs` - GanttTask model with all properties
+3. Created `Models/SyncModels.cs` - Optional<T>, sync request/response DTOs
+4. Created `Data/GanttContext.cs` - DbContext with self-referencing relationships
+5. Updated `Program.cs` - Full SQLite config, CORS, seeding function
+6. Created `Controllers/GanttController.cs` - Load and Sync endpoints with ApplyTaskChanges helper
+
+**Frontend (/QA/gantt-vanilla-starter):**
+1. Created `src/ganttConfig.ts` - Gantt configuration with load/sync URLs
+2. Updated `src/main.ts` - Import Gantt and create instance
+3. Updated `src/style.css` - Added Bryntum CSS imports (fontawesome, gantt.css, theme)
+
+**Diff comparison results:**
+- All files match the working code in `/code/dotnet-sqlite-gantt` and `/code/gantt-vanilla`
+- Only differences are minor whitespace (trailing newlines, spaces) - no functional differences
+- Guide successfully produces working code
+
+### QA Validation of draft-react.md (React guide)
+
+Prompt:
+QA @draft-react.md - Go through guide, modify only code in /QA folder, then compare with final code
+
+Summary:
+Followed the React guide step-by-step and applied all changes to QA starter folders:
+
+**Backend (/QA/dotnet-sqlite-gantt-starter):**
+Same as vanilla guide - re-applied all backend changes:
+1. Updated `appsettings.json` with SQLite connection string
+2. Created `Models/Task.cs` and `Models/SyncModels.cs`
+3. Created `Data/GanttContext.cs`
+4. Updated `Program.cs` with SQLite config, CORS, seeding
+5. Created `Controllers/GanttController.cs`
+
+**Frontend (/QA/gantt-react-starter):**
+1. Created `src/ganttConfig.ts` - React Gantt configuration using `BryntumGanttProps`
+2. Updated `src/App.tsx` - Import and render `BryntumGantt` component with ref
+3. Updated `src/style.css` - Added Bryntum CSS imports and #app styling
+
+**Diff comparison results:**
+- All React source files match exactly (`ganttConfig.ts`, `App.tsx`, `style.css`)
+- Backend files have only minor whitespace differences
+- Guide successfully produces working code
+
+**Issue found in draft-react.md:**
+The `ganttConfig.ts` code block (lines 773-809) has a syntax error - the `listeners` object is placed at the project level instead of inside `taskStore`. The working code has `listeners` correctly nested inside `taskStore`. This should be fixed in the guide.
